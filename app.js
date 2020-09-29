@@ -3,6 +3,7 @@
 // load modules
 const express = require('express');
 const morgan = require('morgan');
+const sequelize = require('./models').sequelize;
 
 // variable to enable global error logging
 const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'true';
@@ -40,6 +41,12 @@ app.use((err, req, res, next) => {
     error: {},
   });
 });
+
+// Connect to DB
+(async () => {
+  await sequelize.authenticate();
+  console.log('Successfully connected to the database!');
+})();
 
 // set our port
 app.set('port', process.env.PORT || 5000);
