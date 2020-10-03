@@ -20,10 +20,43 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true,
     },
-    firstName: DataTypes.STRING,
-    lastName: DataTypes.STRING,
-    emailAddress: DataTypes.STRING,
-    password: DataTypes.STRING
+    firstName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notNull: {
+          msg: "Please provide a value for 'firstName'"
+        }
+      }
+    },
+    lastName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notNull: {
+          msg: "Please provide a value for 'lastName'"
+        }
+      }
+    },
+    emailAddress: {
+      type: DataTypes.STRING,
+      allowNull:false,
+      unique: true,
+      validate: {
+        notNull: {
+          msg: "Please provide a value for 'emailAddress'"
+        }
+      }
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notNull: {
+          msg: "Please provide a value for 'password'"
+        }
+      }
+    }
   }, {
     sequelize,
     modelName: 'User',
