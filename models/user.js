@@ -44,6 +44,7 @@ module.exports = (sequelize, DataTypes) => {
       unique: true,
       isEmail: true,
       validate: {
+        notContains: '\\',
         notNull: {
           msg: "Please provide a value for 'emailAddress'"
         },
