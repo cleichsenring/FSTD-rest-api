@@ -96,7 +96,6 @@ router.post('/users', asyncHandler(async (req, res) => {
 }));
 
 
-
 /* Courses routes */
 router.get('/courses', asyncHandler(async (req, res) => {
   const courses = await Course.findAll(filterOptions);
