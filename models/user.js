@@ -34,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       validate: {
         notNull: {
-          msg: "Please provide a value for 'lastName'"
+          msg: "Please provide a value for 'lastName' "
         }
       }
     },
