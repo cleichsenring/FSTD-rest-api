@@ -69,7 +69,9 @@ router.get('/users', authenticateUser, asyncHandler(async (req, res) => {
 router.post('/users', asyncHandler(async (req, res) => {
   try {
     let { firstName, lastName, emailAddress, password } = req.body;
-    password = bcrypt.hashSync(password, 10);
+    if(password) {
+      password = bcrypt.hashSync(password, 10);
+    }
     await User.create({ firstName, lastName, emailAddress, password })
     res.status(201).set('Location', '/').end();
   } catch (error) {
@@ -106,7 +108,7 @@ router.post('/courses', authenticateUser, asyncHandler(async (req, res, next) =>
     if (error.name === 'SequelizeValidationError') {
       const errors = error.errors.map( err => err.message );
       console.error('Validation errors: ', errors);
-      res.status(400);
+      res.status(400).json({"Errors": errors});
     } else {
       throw error;
     }
@@ -116,17 +118,21 @@ router.post('/courses', authenticateUser, asyncHandler(async (req, res, next) =>
 router.put('/courses/:id', authenticateUser, asyncHandler(async (req, res) => {
   const course = await Course.findByPk(req.params.id);
   if (course) {
-    try {
-      await course.update(req.body);
-      res.status(204).end();
-    } catch (error) {
-      if (error.name === 'SequelizeValidationError') {
-        const errors = error.errors.map( err => err.message );
-        console.error('Validation errors: ', errors);
-        res.status(400).json({"Errors": errors});
-      } else {
-        throw error;
+    if (course.userId === req.currentUser.id) {
+      try {
+        await course.update(req.body);
+        res.status(204).end();
+      } catch (error) {
+        if (error.name === 'SequelizeValidationError') {
+          const errors = error.errors.map( err => err.message );
+          console.error('Validation errors: ', errors);
+          res.status(400).json({"Errors": errors});
+        } else {
+          throw error;
+        }
       }
+    } else {
+      res.status(403).json({message: "Forbidden"});
     }
   } else {
     res.status(404).json({message: `Course id: ${req.params.id} not found`});
@@ -136,8 +142,12 @@ router.put('/courses/:id', authenticateUser, asyncHandler(async (req, res) => {
 router.delete('/courses/:id', authenticateUser, asyncHandler(async (req, res) => {
   const course = await Course.findByPk(req.params.id);
   if (course) {
-    await course.destroy();
-    res.status(204).end();
+    if (course.userId === req.currentUser.id) { 
+      await course.destroy();
+      res.status(204).end();   
+    } else {
+      res.status(403).json({message: "Forbidden"});
+    }
   } else {
     res.status(404).json({message: `Course id: ${req.params.id} not found`});
   }
