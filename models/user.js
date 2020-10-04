@@ -42,9 +42,13 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull:false,
       unique: true,
+      isEmail: true,
       validate: {
         notNull: {
           msg: "Please provide a value for 'emailAddress'"
+        },
+        isEmail: {
+          msg: 'Please provide a valid email address'
         }
       }
     },
@@ -60,6 +64,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'User',
+    // Create index for emailAddress and ensure uniqueness https://sequelize.org/master/manual/indexes.html
+    indexes: [{ unique: true, fields: ['emailAddress'] }]
   });
   return User;
 };
