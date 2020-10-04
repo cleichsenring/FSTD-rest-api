@@ -7,6 +7,8 @@ const auth = require('basic-auth');
 
 const router = express.Router();
 
+
+// Filter out attributes for Course routes
 const filterOptions = {
   include:[{ 
     model: User,
@@ -69,11 +71,19 @@ router.get('/users', authenticateUser, asyncHandler(async (req, res) => {
 router.post('/users', asyncHandler(async (req, res) => {
   try {
     let { firstName, lastName, emailAddress, password } = req.body;
-    if(password) {
-      password = bcrypt.hashSync(password, 10);
+
+    // Check DB to see if user with email address already exists
+    const existingUser = await User.findOne({where: { emailAddress: emailAddress }});
+    if (!existingUser) {
+      // Check if password exist before trying to hash
+      if(password) {
+        password = bcrypt.hashSync(password, 10);
+      }
+      await User.create({ firstName, lastName, emailAddress, password });
+      res.status(201).set('Location', '/').end();
+    } else {
+      res.status(400).json({"Error": `User with email: ${emailAddress} already exists!`});
     }
-    await User.create({ firstName, lastName, emailAddress, password })
-    res.status(201).set('Location', '/').end();
   } catch (error) {
     if (error.name === 'SequelizeValidationError') {
       const errors = error.errors.map( err => err.message );
