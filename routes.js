@@ -71,24 +71,22 @@ router.get('/users', authenticateUser, asyncHandler(async (req, res) => {
 router.post('/users', asyncHandler(async (req, res) => {
   try {
     let { firstName, lastName, emailAddress, password } = req.body;
-
-    // Check DB to see if user with email address already exists
-    const existingUser = await User.findOne({where: { emailAddress: emailAddress }});
-    if (!existingUser) {
-      // Check if password exist before trying to hash
-      if(password) {
-        password = bcrypt.hashSync(password, 10);
-      }
-      await User.create({ firstName, lastName, emailAddress, password });
-      res.status(201).set('Location', '/').end();
-    } else {
-      res.status(400).json({"Error": `User with email: ${emailAddress} already exists!`});
+    // Check if password exist before trying to hash
+    if(password) {
+      password = bcrypt.hashSync(password, 10);
     }
+    await User.create({ firstName, lastName, emailAddress, password });
+    res.status(201).set('Location', '/').end();
   } catch (error) {
+    // Validation error catching
     if (error.name === 'SequelizeValidationError') {
       const errors = error.errors.map( err => err.message );
       console.error('Validation errors: ', errors);
       res.status(400).json({"Errors": errors});
+
+      // Unique email constraint error catching
+    } else if (error.name === 'SequelizeUniqueConstraintError') {
+      res.status(400).json({"Error": `User with email: ${req.body.emailAddress} already exists!`});
     } else {
       throw error;
     }
