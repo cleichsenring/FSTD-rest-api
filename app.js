@@ -59,6 +59,8 @@ const server = app.listen(app.get('port'), () => {
   try {
     await sequelize.authenticate();
     console.log('Successfully connected to the database!');
+
+    console.log('Syncing DB models...')
     await sequelize.sync();
     console.log('Successfully synced DB models');  
   } catch (error) {
